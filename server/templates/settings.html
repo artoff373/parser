@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Настройки профиля поиска</title>
+    <link rel="stylesheet" href="./templates/css/bootstrap-grid.css">
+    <link rel="stylesheet" href="./templates/css/bootstrap-reboot.css">
+    <link rel="stylesheet" href="./templates/css/bootstrap.css">
+</head>
+
+<body>
+    <header class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <h1 class="lead navbar-brand">Настройки "{{.Name}}"</h1>
+        <form class="btn btn-success mr-4 mr-auto" method="POST" action="/">
+            <button type="submit" class="btn btn-success mr-4 mr-auto">Вернуться к выбору</button>
+        </form>
+        <button type="submit" class="btn btn-primary mr-4">Отчет</button>
+        <button type="submit" class="btn btn-primary mr-4">Журнал поиска</button>
+        <button type="submit" class="btn btn-primary mr-4">Еще</button>
+    </header>
+    <main class="jumbotron container mt-5">
+        <div>
+            Последний поиск {{.Last}}
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr class="bg-dark">
+                        <th class="text-white" colspan="3">Источники</th>
+                    </tr>
+                    <tr scope='row'>
+                        <th class="w-auto">Название</th>
+                        <th class="w-25">Селектор</th>
+                        <th style='width:100px'>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .Sources}}
+                    <tr>
+                        <td>{{.}}</td>
+                        <td>Selector</td>
+                        <td>
+                            <button class="btn btn-success mr-1">/</button>
+                            <button class="btn btn-danger">X</button>
+                        </td>
+                    </tr>
+                    {{end}}
+
+                </tbody>
+            </table>
+        </div>
+        <form method="POST" action="settings">
+            <label>Добавить источник ! селектор</label><br>
+            <input type="text" name="addSource" />
+            !
+            <input type="text" name="addSelector" />
+            <button class="btn btn-danger" type="submit" name="sets" value="{{.Name}}">Добавить источник</button>
+        </form>
+        <br>
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr class="bg-dark">
+                        <th class="text-white" colspan="2">Ключи</th>
+                    </tr>
+                    <tr>
+                        <th class="w-auto">Название</th>
+                        <th style='width:100px'>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .Keys}}
+                    <tr>
+                        <td>{{.}}</td>
+                        <td>
+                            <button class="btn btn-success mr-1">/</button>
+                            <button class="btn btn-danger">X</button>
+                        </td>
+                    </tr>
+                    {{end}}
+
+                </tbody>
+            </table>
+        </div>
+
+        <form method="POST" action="settings">
+            <label>Добавить источник</label><br>
+            <input type="text" name="addKey" />
+            <button class="btn btn-danger" type="submit" name="sets" value="{{.Name}}">Добавить ключ</button>
+        </form>
+    </main>
+</body>
+
+</html>
