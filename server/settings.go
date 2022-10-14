@@ -44,13 +44,15 @@ func settings(w http.ResponseWriter, r *http.Request) {
 	}
 	var htmlProfile profileHTML
 	htmlProfile.Name = template.HTML(profile.Name)
-	htmlProfile.Last = template.HTML(profile.Last)
+	htmlProfile.Last = template.HTML("заглушка") //profile.LastSearch)
 	for i := 0; i < len(profile.Keys); i++ {
 		htmlProfile.Keys = append(htmlProfile.Keys, template.HTML(profile.Keys[i]))
+		htmlProfile.Sources = append(htmlProfile.Sources, template.HTML("заглушка"))
 	}
-	for i := 0; i < len(profile.Source); i++ {
+	/*for i := 0; i < len(profile.Source); i++ {
 		htmlProfile.Sources = append(htmlProfile.Sources, template.HTML(profile.Source[i]))
-	}
+	}*/
+
 	var page = template.Must(template.ParseFiles("./templates/settings.html"))
 	if err := page.Execute(w, htmlProfile); err != nil {
 		log.Fatal(err)

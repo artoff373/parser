@@ -1,7 +1,7 @@
 package myparser
 
 import (
-	"context"
+	"database/sql"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -11,35 +11,30 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Метод для парсинга конкретной новости из xml
-func (n *News) parsingNews(ls *time.Time, sel *string, node *words.Branch,
-	ns *string, client *mongo.Client, p *string) error {
+func (n *News) parsingNews(ls *string, sel *string, node *words.Branch,
+	ns *string, db *sql.DB, p *Profile) error {
 	t, err := time.Parse(time.RFC1123Z, n.PubDate)
 	if err != nil {
 		return fmt.Errorf("проблемы с парсингом даты %s: %v", n.PubDate, err)
 	}
-
-	if t.After(*ls) {
-		var post Post
-		post.Text, err = getNews(n.Link, *sel)
+	last, err := time.Parse(time.RFC3339, *ls)
+	if err != nil {
+		return fmt.Errorf("проблемы с парсингом даты %s: %v", last, err)
+	}
+	if t.After(last) {
+		text, err := getNews(n.Link, *sel)
 		if err != nil {
 			return fmt.Errorf("проблемы с парсингом страницы: %v", err)
 		}
-		post.Dictionary = words.SortUniq(strings.Split(post.Text, " "))
-		post.Relev = words.SearchKeys(node, post.Dictionary)
-		if post.Relev > 1 {
-			post.PubDate = n.PubDate
-			post.Title = n.Title
-			post.Link = n.Link
-			post.SearchDate = *ns
-			post.Fresh = true
-			collection := client.Database("parser").Collection(*p)
-			_, err := collection.InsertOne(context.TODO(), post)
+		dictionary := words.SortUniq(strings.Split(text, " "))
+		relev := words.SearchKeys(node, dictionary)
+		if relev > 1 {
+			_, err := db.Exec(fmt.Sprintf(`INSERT INTO "Search"."Posts" ("title", "text", "pub_date", "relev", "url", "is_in_report", "fresh", "profile_id", "source_id", "search_date") values ('%s', '%s', '%s', %f, '%s', '%v', '%v', %d, %d, '%s')`, n.Title, text, n.PubDate, relev, n.Link, false, false, p.ID, p.Source.ID, *ns))
 			if err != nil {
-				return fmt.Errorf("проблемы со вставкой документа в базу%v", err)
+				return fmt.Errorf("проблемы со вставкой новости в базу - %v", err)
 			}
 		}
 	}
@@ -64,11 +59,7 @@ func getNews(link, selector string) (string, error) {
 }
 
 // Парсим RSS ленту
-func parsingSource(s string) (a Rss, e error) {
-	ind := strings.Index(s, "!")
-	URL := s[:ind]
-	selector := s[ind+1:]
-	a.Selector = selector
+func parsingSource(URL string) (a Rss, e error) {
 	client := &http.Client{}
 	res, err := client.Get(string(URL))
 	if err != nil {
@@ -87,26 +78,37 @@ func parsingSource(s string) (a Rss, e error) {
 }
 
 // парсим профиль
-func parsingProfile(p Profile, mongoClient *mongo.Client) (string, error) {
+func parsingProfile(p Profile, db *sql.DB) (string, error) {
 	if len(p.Keys) == 0 {
-		return p.Last, fmt.Errorf("список ключей %s пуст", p.Name)
+		return p.LastSearch, fmt.Errorf("список ключей %s пуст", p.Name)
 	}
+	query := fmt.Sprintf(`SELECT "id","url", "selector" FROM "Search"."Sources" WHERE profile_id = %d`, p.ID)
+	sources, err := db.Query(query)
+	if err != nil {
+		return p.LastSearch, fmt.Errorf("проблемы с получением списка источников -%v", err)
+	}
+	defer sources.Close()
 	node := words.Tree(p.Keys)
 	var result error
-	LastSearch, err := time.Parse(time.RFC1123Z, p.Last)
-	if err != nil {
-		result = fmt.Errorf("проблемы с парсингом даты последнего поиска %s - %s: %v", p.Name, p.Last, err)
-		LastSearch = time.Now().Add(-(time.Hour * 24))
-	}
-	newSearch := time.Now().Format(time.RFC1123Z)
-	for i := range p.Source {
-		answer, err := parsingSource(p.Source[i])
+	newSearch := time.Now().GoString()
+	for sources.Next() {
+		err = sources.Scan(&p.Source.ID, &p.Source.URL, &p.Source.Selector)
+		if err != nil {
+			return p.LastSearch, fmt.Errorf("проблемы с списка источников - %v", err)
+		}
+
+		answer, err := parsingSource(p.Source.URL)
 		if err != nil {
 			result = fmt.Errorf("%v - %v", result, err)
+			continue
 		}
 		for i := range answer.Channels.News {
 			news := &answer.Channels.News[i]
-			news.parsingNews(&LastSearch, &answer.Selector, node, &newSearch, mongoClient, &p.Name)
+			err = news.parsingNews(&p.LastSearch, &p.Source.Selector, node, &newSearch, db, &p)
+			if err != nil {
+				result = fmt.Errorf("%v - %v", result, err)
+				continue
+			}
 		}
 	}
 	return newSearch, result

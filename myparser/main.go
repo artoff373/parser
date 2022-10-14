@@ -1,52 +1,54 @@
 package myparser
 
 import (
-	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"time"
+)
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "postgres"
+	password = "1q2w3e4r"
+	dbname   = "Search"
 )
 
 // Подключение к БД
-func connecting() *mongo.Client {
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+func connecting() *sql.DB {
+	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	db, err := sql.Open("postgres", psqlconn)
 	if err != nil {
 		log.Printf("Проблемы с подключением\n%v", err)
 	}
-	return client
+	return db
 }
 
 // Поиск по профилю
 func Search() error {
 	for {
-		client := connecting()
-		defer client.Disconnect(context.TODO())
+		db := connecting()
+		defer db.Close()
 		//Перебор профилей
-		collection := client.Database("parser").Collection("profile")
-		cur, err := collection.Find(context.TODO(), bson.D{{}})
+		rows, err := db.Query(`SELECT "id", "name", "last_search", "keys" FROM "Search"."Profile"`)
 		if err != nil {
 			return fmt.Errorf("проблемы с получением коллекции профилей\n%v", err)
 		}
-		var profiles []Profile
-		err = cur.All(context.TODO(), &profiles)
-		if err != nil {
-			return fmt.Errorf("проблемы с присвоением коллекции профилей\n%v", err)
-		}
-		for _, profile := range profiles {
+		defer rows.Close()
+		for rows.Next() {
+			var profile Profile
+			err = rows.Scan(&profile.ID, &profile.Name, &profile.LastSearch, &profile.Keys)
+			if err != nil {
+				return fmt.Errorf("проблемы с присвоением коллекции профилей\n%v", err)
+			}
 			//Парсим источники
-			t, err := parsingProfile(profile, client)
+			t, err := parsingProfile(profile, db)
 			if err != nil {
 				return fmt.Errorf("проблемы с парсингом профиля %s: %v", profile.Name, err)
 			}
 			//Обновляем время последнего поиска
-			filter := bson.D{{Key: "name", Value: profile.Name}}
-			update := bson.D{{Key: "$set", Value: bson.D{{Key: "last", Value: t}}}}
-			collection.FindOneAndUpdate(context.TODO(), filter, update)
+			fmt.Printf("Закончил разбор %s - %v", profile.Name, t)
 		}
 		time.Sleep(time.Minute)
 	}

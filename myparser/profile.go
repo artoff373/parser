@@ -2,6 +2,8 @@ package myparser
 
 import (
 	"encoding/xml"
+
+	"github.com/lib/pq"
 )
 
 type Post struct {
@@ -18,17 +20,21 @@ type Post struct {
 }
 
 type Profile struct {
-	Name   string   `bson:"name"`
-	Keys   []string `bson:"keys"`
-	Last   string   `bson:"last"`
-	Source Sources  `bson:"sources"`
+	ID         int
+	Name       string
+	LastSearch string
+	Keys       pq.StringArray
+	Source     Sources
 }
-type Sources []string
-
+type Sources struct {
+	ID       int
+	Name     string
+	URL      string
+	Selector string
+}
 type Rss struct {
 	XMLName  xml.Name `xml:"rss"`
 	Channels Channel  `xml:"channel"`
-	Selector string
 }
 type Channel struct {
 	XMLName xml.Name `xml:"channel"`
