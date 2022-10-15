@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/xml"
 	"fmt"
+	"strings"
 
 	"github.com/lib/pq"
 )
@@ -21,27 +22,8 @@ type Post struct {
 }
 
 func (post *Post) insert(pID int, sID int, db *sql.DB) error {
-	res, err := db.Query(fmt.Sprintf(`INSERT INTO "Search"."Posts" ("title") VALUES ('%s') RETURNING id`, post.Title))
-	if err != nil {
-		return fmt.Errorf("ошибка вставки - %v", err)
-	}
-	defer res.Close()
-	var id int
-	for res.Next() {
-		err = res.Scan(&id)
-		if err != nil {
-			return fmt.Errorf("ошибка получения id вставки - %v", err)
-		}
-	}
-	_, err = db.Exec(fmt.Sprintf(`UPDATE "Search"."Posts" SET is_in_report=false, fresh=true,  text='%s', relev=%f, url='%s' WHERE "id" = %d`, post.Text, post.Relev, post.Link, id))
-	if err != nil {
-		return fmt.Errorf("ошибка вставки - %v", err)
-	}
-	_, err = db.Exec(fmt.Sprintf(`UPDATE "Search"."Posts" SET profile_id=%d, source_id=%d, pub_date='%s', search_date='%s' WHERE "id" = %d`, pID, sID, post.PubDate, post.SearchDate, id))
-	if err != nil {
-		return fmt.Errorf("ошибка вставки - %v", err)
-	}
-	_, err = db.Exec(fmt.Sprintf(`UPDATE "Search"."Posts" SET dictionary=%vWHERE "id" = %d`, post.Dictionary, id))
+	insert := fmt.Sprintf(`INSERT INTO "Search"."Posts" ("title", "text", "pub_date", "relev", "url", "is_in_report", "fresh", "profile_id", "source_id", "search_date", "dictionary") VALUES ('%s', '%s', '%s', %f, '%s', false, true, %d, %d, '%s', '{"%s"}')`, post.Title, post.Text, post.PubDate, post.Relev, post.Link, pID, sID, post.SearchDate, strings.Join(post.Dictionary, "\", \""))
+	_, err := db.Exec(insert)
 	if err != nil {
 		return fmt.Errorf("ошибка вставки - %v", err)
 	}
