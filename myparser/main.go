@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"time"
 )
 
 const (
@@ -27,29 +26,30 @@ func connecting() *sql.DB {
 
 // Поиск по профилю
 func Search() error {
-	for {
-		db := connecting()
-		defer db.Close()
-		//Перебор профилей
-		rows, err := db.Query(`SELECT "id", "name", "last_search", "keys" FROM "Search"."Profile"`)
-		if err != nil {
-			return fmt.Errorf("проблемы с получением коллекции профилей\n%v", err)
-		}
-		defer rows.Close()
-		for rows.Next() {
-			var profile Profile
-			err = rows.Scan(&profile.ID, &profile.Name, &profile.LastSearch, &profile.Keys)
-			if err != nil {
-				return fmt.Errorf("проблемы с присвоением коллекции профилей\n%v", err)
-			}
-			//Парсим источники
-			t, err := parsingProfile(profile, db)
-			if err != nil {
-				return fmt.Errorf("проблемы с парсингом профиля %s: %v", profile.Name, err)
-			}
-			//Обновляем время последнего поиска
-			fmt.Printf("Закончил разбор %s - %v", profile.Name, t)
-		}
-		time.Sleep(time.Minute)
+	//for {
+	db := connecting()
+	defer db.Close()
+	//Перебор профилей
+	rows, err := db.Query(`SELECT "id", "name", "last_search", "keys" FROM "Search"."Profile"`)
+	if err != nil {
+		return fmt.Errorf("проблемы с получением коллекции профилей\n%v", err)
 	}
+	defer rows.Close()
+	for rows.Next() {
+		var profile Profile
+		err = rows.Scan(&profile.ID, &profile.Name, &profile.LastSearch, &profile.Keys)
+		if err != nil {
+			return fmt.Errorf("проблемы с присвоением коллекции профилей\n%v", err)
+		}
+		//Парсим источники
+		t, err := parsingProfile(profile, db)
+		if err != nil {
+			return fmt.Errorf("проблемы с парсингом профиля %s: %v", profile.Name, err)
+		}
+		//Обновляем время последнего поиска
+		fmt.Printf("Закончил разбор %s - %v", profile.Name, t)
+	}
+	//time.Sleep(time.Minute)
+	//}
+	return nil
 }

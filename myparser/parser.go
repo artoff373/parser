@@ -16,6 +16,7 @@ import (
 // Метод для парсинга конкретной новости из xml
 func (n *News) parsingNews(ls *string, sel *string, node *words.Branch,
 	ns *string, db *sql.DB, p *Profile) error {
+	var post Post
 	t, err := time.Parse(time.RFC1123Z, n.PubDate)
 	if err != nil {
 		return fmt.Errorf("проблемы с парсингом даты %s: %v", n.PubDate, err)
@@ -25,14 +26,19 @@ func (n *News) parsingNews(ls *string, sel *string, node *words.Branch,
 		return fmt.Errorf("проблемы с парсингом даты %s: %v", last, err)
 	}
 	if t.After(last) {
-		text, err := getNews(n.Link, *sel)
+		post.PubDate = n.PubDate
+		post.Text, err = getNews(n.Link, *sel)
 		if err != nil {
 			return fmt.Errorf("проблемы с парсингом страницы: %v", err)
 		}
-		dictionary := words.SortUniq(strings.Split(text, " "))
-		relev := words.SearchKeys(node, dictionary)
-		if relev > 1 {
-			_, err := db.Exec(fmt.Sprintf(`INSERT INTO "Search"."Posts" ("title", "text", "pub_date", "relev", "url", "is_in_report", "fresh", "profile_id", "source_id", "search_date") values ('%s', '%s', '%s', %f, '%s', '%v', '%v', %d, %d, '%s')`, n.Title, text, n.PubDate, relev, n.Link, false, false, p.ID, p.Source.ID, *ns))
+		post.Dictionary = words.SortUniq(strings.Split(post.Text, " "))
+		post.Relev = words.SearchKeys(node, post.Dictionary)
+		post.Title = n.Title
+		post.SearchDate = *ns
+		post.Link = n.Link
+		if post.Relev > 1 {
+			err = post.insert(p.ID, p.Source.ID, db)
+			//_, err := db.Exec(fmt.Sprintf(`INSERT INTO "Search"."Posts" ("title", "text", "pub_date", "relev", "url", "is_in_report", "fresh", "profile_id", "source_id", "search_date") values ('%s', '%s', '%s', %f, '%s', '%v', '%v', %d, %d, '%s')`, n.Title, text, n.PubDate, relev, n.Link, false, false, p.ID, p.Source.ID, *ns))
 			if err != nil {
 				return fmt.Errorf("проблемы со вставкой новости в базу - %v", err)
 			}

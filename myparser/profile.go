@@ -1,22 +1,51 @@
 package myparser
 
 import (
+	"database/sql"
 	"encoding/xml"
+	"fmt"
 
 	"github.com/lib/pq"
 )
 
 type Post struct {
-	Title      string   `bson:"title"`
-	PubDate    string   `bson:"pub_date"`
-	Link       string   `bson:"link"`
-	Text       string   `bson:"text"`
-	Dictionary []string `bson:"dictionary"`
-	Relev      float64  `bson:"relev"`
-	IsInReport bool     `bson:"is_in_report"`
-	Fresh      bool     `bson:"fresh"`
-	SearchDate string   `bson:"search_date"`
-	Processed  bool     `bson:"processed"`
+	Title      string
+	PubDate    string
+	Link       string
+	Text       string
+	Dictionary pq.StringArray
+	Relev      float64
+	IsInReport bool
+	Fresh      bool
+	SearchDate string
+}
+
+func (post *Post) insert(pID int, sID int, db *sql.DB) error {
+	res, err := db.Query(fmt.Sprintf(`INSERT INTO "Search"."Posts" ("title") VALUES ('%s') RETURNING id`, post.Title))
+	if err != nil {
+		return fmt.Errorf("ошибка вставки - %v", err)
+	}
+	defer res.Close()
+	var id int
+	for res.Next() {
+		err = res.Scan(&id)
+		if err != nil {
+			return fmt.Errorf("ошибка получения id вставки - %v", err)
+		}
+	}
+	_, err = db.Exec(fmt.Sprintf(`UPDATE "Search"."Posts" SET is_in_report=false, fresh=true,  text='%s', relev=%f, url='%s' WHERE "id" = %d`, post.Text, post.Relev, post.Link, id))
+	if err != nil {
+		return fmt.Errorf("ошибка вставки - %v", err)
+	}
+	_, err = db.Exec(fmt.Sprintf(`UPDATE "Search"."Posts" SET profile_id=%d, source_id=%d, pub_date='%s', search_date='%s' WHERE "id" = %d`, pID, sID, post.PubDate, post.SearchDate, id))
+	if err != nil {
+		return fmt.Errorf("ошибка вставки - %v", err)
+	}
+	_, err = db.Exec(fmt.Sprintf(`UPDATE "Search"."Posts" SET dictionary=%vWHERE "id" = %d`, post.Dictionary, id))
+	if err != nil {
+		return fmt.Errorf("ошибка вставки - %v", err)
+	}
+	return nil
 }
 
 type Profile struct {

@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	go myparser.Search()
+	myparser.Search()
 	http.HandleFunc("/report", report)
 	http.HandleFunc("/", root)
 	http.HandleFunc("/settings", settings)
