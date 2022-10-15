@@ -21,7 +21,7 @@ func (n *News) parsingNews(ls *string, sel *string, node *words.Branch,
 	if err != nil {
 		return fmt.Errorf("проблемы с парсингом даты %s: %v", n.PubDate, err)
 	}
-	last, err := time.Parse(time.RFC3339, *ls)
+	last, err := time.Parse(time.RFC1123Z, *ls)
 	if err != nil {
 		return fmt.Errorf("проблемы с парсингом даты %s: %v", last, err)
 	}
@@ -96,7 +96,8 @@ func parsingProfile(p Profile, db *sql.DB) (string, error) {
 	defer sources.Close()
 	node := words.Tree(p.Keys)
 	var result error
-	newSearch := time.Now().GoString()
+	result = fmt.Errorf("%s", p.Name)
+	newSearch := time.Now().Format(time.RFC1123Z)
 	for sources.Next() {
 		err = sources.Scan(&p.Source.ID, &p.Source.URL, &p.Source.Selector)
 		if err != nil {

@@ -44,9 +44,10 @@ func Search() error {
 		//Парсим источники
 		t, err := parsingProfile(profile, db)
 		if err != nil {
-			return fmt.Errorf("проблемы с парсингом профиля %s: %v", profile.Name, err)
+			return fmt.Errorf("проблемы с парсингом профиля: %v", err)
 		}
 		//Обновляем время последнего поиска
+		profile.update(t, db)
 		fmt.Printf("Закончил разбор %s - %v", profile.Name, t)
 	}
 	//time.Sleep(time.Minute)

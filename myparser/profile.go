@@ -21,6 +21,7 @@ type Post struct {
 	SearchDate string
 }
 
+// Вставка поста в БД
 func (post *Post) insert(pID int, sID int, db *sql.DB) error {
 	insert := fmt.Sprintf(`INSERT INTO "Search"."Posts" ("title", "text", "pub_date", "relev", "url", "is_in_report", "fresh", "profile_id", "source_id", "search_date", "dictionary") VALUES ('%s', '%s', '%s', %f, '%s', false, true, %d, %d, '%s', '{"%s"}')`, post.Title, post.Text, post.PubDate, post.Relev, post.Link, pID, sID, post.SearchDate, strings.Join(post.Dictionary, "\", \""))
 	_, err := db.Exec(insert)
@@ -43,6 +44,16 @@ type Sources struct {
 	URL      string
 	Selector string
 }
+
+// Обновление профиля
+func (p *Profile) update(newSearch string, db *sql.DB) error {
+	_, err := db.Exec(`UPDATE "Search"."Profile" SET "last_search" = $1 WHERE "id"=$2`, newSearch, p.ID)
+	if err != nil {
+		return fmt.Errorf("ошибка обновления - %v", err)
+	}
+	return nil
+}
+
 type Rss struct {
 	XMLName  xml.Name `xml:"rss"`
 	Channels Channel  `xml:"channel"`
