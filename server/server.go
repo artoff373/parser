@@ -7,10 +7,7 @@ import (
 )
 
 func main() {
-	err := myparser.Search()
-	if err != nil {
-		log.Fatal(err)
-	}
+	go myparser.Search()
 	http.HandleFunc("/report", report)
 	http.HandleFunc("/", root)
 	http.HandleFunc("/settings", settings)

@@ -28,10 +28,11 @@
             <table class="table table-striped table-sm">
                 <thead>
                     <tr class="bg-dark">
-                        <th class="text-white" colspan="3">Источники</th>
+                        <th class="text-white" colspan="4">Источники</th>
                     </tr>
                     <tr scope='row'>
                         <th class="w-auto">Название</th>
+                        <th class="w-auto">Ссылка</th>
                         <th class="w-25">Селектор</th>
                         <th style='width:100px'>Действия</th>
                     </tr>
@@ -39,11 +40,13 @@
                 <tbody>
                     {{ range .Sources}}
                     <tr>
-                        <td>{{.}}</td>
-                        <td>Selector</td>
+                        <td>{{.Name}}</td>
+                        <td>{{.URL}}</td>
+                        <td>{{.Selector}}</td>
                         <td>
-                            <button class="btn btn-success mr-1">/</button>
-                            <button class="btn btn-danger">X</button>
+                            <form method="POST" action="/settings">
+                            <button class="btn btn-danger" name="del_source" value="{{.ID}}">X</button>
+                            </form>
                         </td>
                     </tr>
                     {{end}}
@@ -52,11 +55,11 @@
             </table>
         </div>
         <form method="POST" action="settings">
-            <label>Добавить источник ! селектор</label><br>
+            <label>Добавить источник</label><br>
             <input type="text" name="addSource" />
-            !
+            <input type="text" name="addLink" />
             <input type="text" name="addSelector" />
-            <button class="btn btn-danger" type="submit" name="sets" value="{{.Name}}">Добавить источник</button>
+            <button class="btn btn-danger" type="submit" name="sets" value="{{.ID}}">Добавить источник</button>
         </form>
         <br>
         <div class="table-responsive">
@@ -75,8 +78,7 @@
                     <tr>
                         <td>{{.}}</td>
                         <td>
-                            <button class="btn btn-success mr-1">/</button>
-                            <button class="btn btn-danger">X</button>
+                            <button class="btn btn-danger" name="del_key" value="{{.}}">X</button>
                         </td>
                     </tr>
                     {{end}}
@@ -88,7 +90,7 @@
         <form method="POST" action="settings">
             <label>Добавить источник</label><br>
             <input type="text" name="addKey" />
-            <button class="btn btn-danger" type="submit" name="sets" value="{{.Name}}">Добавить ключ</button>
+            <button class="btn btn-danger" type="submit" name="sets" value="{{.ID}}">Добавить ключ</button>
         </form>
     </main>
 </body>

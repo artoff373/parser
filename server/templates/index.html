@@ -14,7 +14,7 @@
             <img id="her" src="1.png" alt="">
         </header>
         <main class="jumbotron container mt-5">
-            {{range .Profiles}}
+            {{range .}}
             <div class="row justify-content-between">
                 <div class="col">
                     <h4>{{.Name}}</h4>
@@ -22,10 +22,10 @@
                 <div class="col-3">
                     <div class="row justify-content-end">
                         <form method="POST" action="report">
-                            <button class="btn btn-danger" type="submit" name="profile" value="{{.Name}}" >Отчет</button>
+                            <button class="btn btn-danger" type="submit" name="profile" value="{{.ID}}" >Отчет</button>
                         </form>
                         <form  class="mx-4" method="POST" action="settings">
-                            <button class="btn btn-danger" type="submit" name="sets" value="{{.Name}}">Настройки</button>
+                            <button class="btn btn-danger" type="submit" name="sets" value="{{.ID}}">Настройки</button>
                         </form>
                     </div>
                 </div>

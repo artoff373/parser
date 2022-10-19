@@ -10,6 +10,7 @@ import (
 )
 
 type Post struct {
+	ID         int
 	Title      string
 	PubDate    string
 	Link       string
@@ -45,11 +46,31 @@ type Sources struct {
 	Selector string
 }
 
-// Обновление профиля
-func (p *Profile) update(newSearch string, db *sql.DB) error {
-	_, err := db.Exec(`UPDATE "Search"."Profile" SET "last_search" = $1 WHERE "id"=$2`, newSearch, p.ID)
+// Обновление времени последнего поиска в профиля
+func (p *Profile) Update(newSearch string, db *sql.DB) error {
+	_, err := db.Exec(`UPDATE "Search"."Profile" SET "last_search" = '%s' WHERE "id"=%d`, newSearch, p.ID)
 	if err != nil {
 		return fmt.Errorf("ошибка обновления - %v", err)
+	}
+	return nil
+}
+
+// Добавление ключа в профиль
+func (p *Profile) AddKey(newKey string, db *sql.DB) error {
+	add := fmt.Sprintf(`UPDATE "Search"."Profile" SET "keys" = array_append("keys", '%s') WHERE "id" = %d`, newKey, p.ID)
+	_, err := db.Exec(add)
+	if err != nil {
+		return fmt.Errorf("ошибка добавления ключа - %v", err)
+	}
+	return nil
+}
+
+// Добавление источника в профиль
+func (p *Profile) AddSource(s Sources, db *sql.DB) error {
+	insert := fmt.Sprintf(`INSERT INTO "Search"."Sources" ("name", "url", "selector", "profile_id") VALUES ('%s', '%s', '%s', %d)`, s.Name, s.URL, s.Selector, p.ID)
+	_, err := db.Exec(insert)
+	if err != nil {
+		return fmt.Errorf("ошибка добавления источника - %v\n %s", err, insert)
 	}
 	return nil
 }

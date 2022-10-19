@@ -1,51 +1,39 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"html/template"
 	"log"
+	"mysearch/myparser"
 	"net/http"
-
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type templeHTML struct {
-	Profiles []profileHTML
-}
-type profileHTML struct {
-	Name    template.HTML
-	Keys    []template.HTML
-	Last    template.HTML
-	Sources []template.HTML
-}
-type profileBD struct {
-	Name string `bson:"name"`
-}
-
 func root(w http.ResponseWriter, r *http.Request) {
-	var teHTML templeHTML
-	var proBD []profileBD
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
-	client, _ := mongo.Connect(context.TODO(), clientOptions)
-	collection := client.Database("parser").Collection("profile")
-	cur, err := collection.Find(context.TODO(), bson.D{{}})
+	var root rootHTML
+	db, err := myparser.Сonnecting()
 	if err != nil {
-		fmt.Fprintf(w, "Проблемы с получением коллекции профилей%v", err)
+		fmt.Printf("проблемы с подключением к базе%v", err)
 	}
-	err = cur.All(context.TODO(), &proBD)
+	defer db.Close()
+	rows, err := db.Query(`SELECT "name", "id" FROM "Search"."Profile"`)
 	if err != nil {
-		fmt.Fprintf(w, "Проблемы с присвоением коллекции профилей%v", err)
+		fmt.Printf("проблемы с получением списка профилей\n%v", err)
 	}
-	for i := 0; i < len(proBD); i++ {
-		var name profileHTML
-		name.Name = template.HTML(proBD[i].Name)
-		teHTML.Profiles = append(teHTML.Profiles, name)
+	defer rows.Close()
+	for rows.Next() {
+		var profile roots
+		var name string
+		var id int
+		err = rows.Scan(&name, &id)
+		if err != nil {
+			fmt.Fprintf(w, "проблемы с получением списка профилей\n%v", err)
+		}
+		profile.Name = template.HTML(name)
+		profile.ID = template.HTML(fmt.Sprint(id))
+		root = append(root, profile)
 	}
 	var start = template.Must(template.ParseFiles("./templates/index.html"))
-	if err := start.Execute(w, teHTML); err != nil {
+	if err := start.Execute(w, root); err != nil {
 		log.Fatal(err)
 	}
 }

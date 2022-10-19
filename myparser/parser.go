@@ -69,6 +69,7 @@ func parsingSource(URL string) (a Rss, e error) {
 	client := &http.Client{}
 	res, err := client.Get(string(URL))
 	if err != nil {
+
 		return a, fmt.Errorf("не смог подключиться к RSS %s - %v", URL, err)
 	}
 	byteValue, _ := io.ReadAll(res.Body)
@@ -84,28 +85,32 @@ func parsingSource(URL string) (a Rss, e error) {
 }
 
 // парсим профиль
-func parsingProfile(p Profile, db *sql.DB) (string, error) {
+func parsingProfile(p Profile, db *sql.DB, lg *chan string) (string, error) {
 	if len(p.Keys) == 0 {
+		*lg <- fmt.Sprintf("список ключей %s пуст", p.Name)
 		return p.LastSearch, fmt.Errorf("список ключей %s пуст", p.Name)
 	}
-	query := fmt.Sprintf(`SELECT "id","url", "selector" FROM "Search"."Sources" WHERE profile_id = %d`, p.ID)
-	sources, err := db.Query(query)
-	if err != nil {
-		return p.LastSearch, fmt.Errorf("проблемы с получением списка источников -%v", err)
-	}
-	defer sources.Close()
 	node := words.Tree(p.Keys)
 	var result error
 	result = fmt.Errorf("%s", p.Name)
 	newSearch := time.Now().Format(time.RFC1123Z)
+	query := fmt.Sprintf(`SELECT "id","url", "selector" FROM "Search"."Sources" WHERE profile_id = %d`, p.ID)
+	sources, err := db.Query(query)
+	if err != nil {
+		*lg <- fmt.Sprintf("проблемы с получением списка источников -%v", err)
+		return p.LastSearch, fmt.Errorf("проблемы с получением списка источников -%v", err)
+	}
+	defer sources.Close()
 	for sources.Next() {
 		err = sources.Scan(&p.Source.ID, &p.Source.URL, &p.Source.Selector)
 		if err != nil {
+			*lg <- fmt.Sprintf("проблемы с списка источников - %v", err)
 			return p.LastSearch, fmt.Errorf("проблемы с списка источников - %v", err)
 		}
 
 		answer, err := parsingSource(p.Source.URL)
 		if err != nil {
+			*lg <- fmt.Sprint(err)
 			result = fmt.Errorf("%v - %v", result, err)
 			continue
 		}
@@ -113,6 +118,7 @@ func parsingProfile(p Profile, db *sql.DB) (string, error) {
 			news := &answer.Channels.News[i]
 			err = news.parsingNews(&p.LastSearch, &p.Source.Selector, node, &newSearch, db, &p)
 			if err != nil {
+				*lg <- fmt.Sprint(err)
 				result = fmt.Errorf("%v - %v", result, err)
 				continue
 			}
