@@ -1,7 +1,6 @@
 package myparser
 
 import (
-	"database/sql"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -15,7 +14,7 @@ import (
 
 // Метод для парсинга конкретной новости из xml
 func (n *News) parsingNews(ls *string, sel *string, node *words.Branch,
-	ns *string, db *sql.DB, p *Profile) error {
+	ns *string, p *Profile) error {
 	var post Post
 	t, err := time.Parse(time.RFC1123Z, n.PubDate)
 	if err != nil {
@@ -37,7 +36,7 @@ func (n *News) parsingNews(ls *string, sel *string, node *words.Branch,
 		post.SearchDate = *ns
 		post.Link = n.Link
 		if post.Relev > 1 {
-			err = post.insert(p.ID, p.Source.ID, db)
+			err = post.insert(p.ID, p.Source.ID, SDB.Db)
 			//_, err := db.Exec(fmt.Sprintf(`INSERT INTO "Search"."Posts" ("title", "text", "pub_date", "relev", "url", "is_in_report", "fresh", "profile_id", "source_id", "search_date") values ('%s', '%s', '%s', %f, '%s', '%v', '%v', %d, %d, '%s')`, n.Title, text, n.PubDate, relev, n.Link, false, false, p.ID, p.Source.ID, *ns))
 			if err != nil {
 				return fmt.Errorf("проблемы со вставкой новости в базу - %v", err)
@@ -85,7 +84,7 @@ func parsingSource(URL string) (a Rss, e error) {
 }
 
 // парсим профиль
-func parsingProfile(p Profile, db *sql.DB, lg *chan string) (string, error) {
+func parsingProfile(p Profile, lg *chan string) (string, error) {
 	if len(p.Keys) == 0 {
 		*lg <- fmt.Sprintf("список ключей %s пуст", p.Name)
 		return p.LastSearch, fmt.Errorf("список ключей %s пуст", p.Name)
@@ -95,7 +94,7 @@ func parsingProfile(p Profile, db *sql.DB, lg *chan string) (string, error) {
 	result = fmt.Errorf("%s", p.Name)
 	newSearch := time.Now().Format(time.RFC1123Z)
 	query := fmt.Sprintf(`SELECT "id","url", "selector" FROM "Search"."Sources" WHERE profile_id = %d`, p.ID)
-	sources, err := db.Query(query)
+	sources, err := SDB.Db.Query(query)
 	if err != nil {
 		*lg <- fmt.Sprintf("проблемы с получением списка источников -%v", err)
 		return p.LastSearch, fmt.Errorf("проблемы с получением списка источников -%v", err)
@@ -116,7 +115,7 @@ func parsingProfile(p Profile, db *sql.DB, lg *chan string) (string, error) {
 		}
 		for i := range answer.Channels.News {
 			news := &answer.Channels.News[i]
-			err = news.parsingNews(&p.LastSearch, &p.Source.Selector, node, &newSearch, db, &p)
+			err = news.parsingNews(&p.LastSearch, &p.Source.Selector, node, &newSearch, &p)
 			if err != nil {
 				*lg <- fmt.Sprint(err)
 				result = fmt.Errorf("%v - %v", result, err)

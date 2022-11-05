@@ -12,6 +12,9 @@
         <header class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
             <h1 class="title bg-dark lead navbar-brand mr-auto">Выберите профиль поиска</h1>
             <img id="her" src="1.png" alt="">
+            <form class="mx-4" method="POST" action="db">
+                <button class="btn btn-danger" type="submit" name="changeBd">Изменить настройки подключения к БД</button>
+            </form>
         </header>
         <main class="jumbotron container mt-5">
             {{range .}}
@@ -19,8 +22,9 @@
                 <div class="col">
                     <h4>{{.Name}}</h4>
                 </div>
-                <div class="col-3">
+                <div class="col-4">
                     <div class="row justify-content-end">
+
                         <form method="POST" action="report">
                             <button class="btn btn-danger" type="submit" name="profile" value="{{.ID}}" >Отчет</button>
                         </form>

@@ -19,25 +19,22 @@ func settings(w http.ResponseWriter, r *http.Request) {
 	newSource.URL = r.PostFormValue("addLink")
 	newSource.Selector = r.PostFormValue("addSelector")
 	//Ищем профиль в БД
-	db, err := myparser.Сonnecting()
-	if err != nil {
-		fmt.Fprintf(w, "ошибка подключения к базе %v", err)
-	}
-	defer db.Close()
+	PDD.Сonnecting()
+	defer PDD.Db.Close()
 	if newKey != "" {
-		err = profile.AddKey(newKey, db)
+		err := profile.AddKey(newKey, PDD.Db)
 		if err != nil {
 			fmt.Fprintf(w, "ошибка добавления ключа %s - %v", newKey, err)
 		}
 	}
 	if (newSource.URL != "") && (newSource.Selector != "") && (newSource.Name != "") {
-		err = profile.AddSource(newSource, db)
+		err := profile.AddSource(newSource, PDD.Db)
 		if err != nil {
 			fmt.Fprintf(w, "ошибка добавления источника %s - %v", newSource.Name, err)
 		}
 	}
 	qry := fmt.Sprintf(`SELECT "name", "last_search", "keys" FROM "Search"."Profile" WHERE "id" = %d`, profile.ID)
-	rows, err := db.Query(qry)
+	rows, err := PDD.Db.Query(qry)
 	if err != nil {
 		fmt.Printf("проблемы с получением списка профилей\n%v", err)
 	}
@@ -55,7 +52,7 @@ func settings(w http.ResponseWriter, r *http.Request) {
 			htmlProfile.Keys = append(htmlProfile.Keys, template.HTML(profile.Keys[i]))
 		}
 		query := fmt.Sprintf(`SELECT "id", "name","url", "selector" FROM "Search"."Sources" WHERE profile_id = %d`, profile.ID)
-		sources, err := db.Query(query)
+		sources, err := PDD.Db.Query(query)
 		if err != nil {
 			fmt.Fprintf(w, "проблемы с получением списка источников -%v", err)
 		}

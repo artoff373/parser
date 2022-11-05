@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Настройки профиля поиска</title>
+    <link rel="stylesheet" href="./templates/css/bootstrap-grid.css">
+    <link rel="stylesheet" href="./templates/css/bootstrap-reboot.css">
+    <link rel="stylesheet" href="./templates/css/bootstrap.css">
+</head>
+
+<body>
+    <header class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <h1 class="lead navbar-brand">Подключиться к базе</h1>
+    </header>
+    <main class="jumbotron container mt-5">
+                <form name="root" method="POST" action="/index">
+                    <label>Адрес базы данных</label><br>
+                    <input type="text" name="Host"  value="localhost" /> :
+                    <input type="text" name="Port"  value="5432" size="4"/><br><br>
+                    <label>База данных</label><br>
+                    <input type="text" name="DbName"  value="Search" /><br><br>
+                    <label>Имя пользователя</label><br>
+                    <input type="text" name="User" value="postgres"/><br><br>
+                    <label>Пароль</label><br>
+                    <input type="password" name="Password" value="1q2w3e4r"/><br><br>
+                    <button class="btn btn-danger" type="submit" name="settings">Подключиться</button>
+                </form>
+
+    </main>
+</body>
+
+</html>

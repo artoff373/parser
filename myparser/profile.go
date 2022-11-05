@@ -9,6 +9,38 @@ import (
 	"github.com/lib/pq"
 )
 
+type DbData struct {
+	Host     string //= "localhost"
+	Port     int    //= 5432
+	User     string //= "postgres"
+	Password string //= "1q2w3e4r"
+	DbName   string //= "Search"
+	Db       *sql.DB
+	Connect  bool
+}
+
+// Инициализация БД
+func (DD *DbData) NewDb(host, dbname, user, password string, port int) {
+	DD.Host = host
+	DD.Port = port
+	DD.DbName = dbname
+	DD.Password = password
+	DD.User = user
+}
+
+// Подключение к БД
+func (DD *DbData) Сonnecting() error {
+	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", DD.Host, DD.Port, DD.User, DD.Password, DD.DbName)
+	db, _ := sql.Open("postgres", psqlconn)
+	err := db.Ping()
+	if err != nil {
+		return fmt.Errorf("проблемы с подключением\n%v", err)
+	}
+	DD.Db = db
+	DD.Connect = true
+	return nil
+}
+
 type Post struct {
 	ID         int
 	Title      string

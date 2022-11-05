@@ -12,10 +12,13 @@
 <body>
     <header class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
         <h1 class="lead navbar-brand">Настройки "{{.Name}}"</h1>
-        <form class="btn btn-success mr-4 mr-auto" method="POST" action="/">
-            <button type="submit" class="btn btn-success mr-4 mr-auto">Вернуться к выбору</button>
+        <form class="btn btn-success mr-4 mr-auto" method="POST" action="/index">
+            <button type="submit" class="btn btn-success mr-4 ">Вернуться к выбору</button>
         </form>
-        <button type="submit" class="btn btn-primary mr-4">Отчет</button>
+        <form  method="POST" action="/report">
+            <button type="submit" class="btn btn-primary mr-4" name="profile" value="{{.ID}}">Отчет</button>
+        </form>
+        
         <button type="submit" class="btn btn-primary mr-4">Журнал поиска</button>
         <button type="submit" class="btn btn-primary mr-4">Еще</button>
     </header>

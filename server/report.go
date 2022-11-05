@@ -13,13 +13,10 @@ func report(w http.ResponseWriter, r *http.Request) {
 	var posts myparser.Post
 	var reports postHTML
 	profile, _ := strconv.Atoi(r.FormValue("profile"))
-	db, err := myparser.Сonnecting()
-	if err != nil {
-		fmt.Fprintf(w, "ошибка подключения к базе %v", err)
-	}
-	defer db.Close()
+	PDD.Сonnecting()
+	defer PDD.Db.Close()
 	qry := fmt.Sprintf(`SELECT "id", "title", "text", "relev", "url", "pub_date" FROM "Search"."Posts" WHERE "fresh" = TRUE AND "profile_id" = %d`, profile)
-	rows, err := db.Query(qry)
+	rows, err := PDD.Db.Query(qry)
 	if err != nil {
 		fmt.Printf("проблемы с получением списка постов\n%v", err)
 	}
