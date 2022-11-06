@@ -10,11 +10,11 @@ import (
 )
 
 type DbData struct {
-	Host     string //= "localhost"
-	Port     int    //= 5432
-	User     string //= "postgres"
-	Password string //= "1q2w3e4r"
-	DbName   string //= "Search"
+	Host     string `json:"host"`     //= "localhost"
+	Port     int    `json:"port"`     //= 5432
+	User     string `json:"user"`     //= "postgres"
+	Password string `json:"password"` //= "1q2w3e4r"
+	DbName   string `json:"dbName"`   //= "Search"
 	Db       *sql.DB
 	Connect  bool
 }

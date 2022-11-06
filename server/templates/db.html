@@ -13,20 +13,52 @@
         <h1 class="lead navbar-brand">Подключиться к базе</h1>
     </header>
     <main class="jumbotron container mt-5">
-                <form name="root" method="POST" action="/index">
+                <form id="root" name="root" method="POST" action="/index">
                     <label>Адрес базы данных</label><br>
-                    <input type="text" name="Host"  value="localhost" /> :
-                    <input type="text" name="Port"  value="5432" size="4"/><br><br>
+                    <input type="text" name="host"  value="localhost" /> :
+                    <input type="text" name="port"  value="5432" size="4"/><br><br>
                     <label>База данных</label><br>
-                    <input type="text" name="DbName"  value="Search" /><br><br>
+                    <input type="text" name="dbName"  value="Search" /><br><br>
                     <label>Имя пользователя</label><br>
-                    <input type="text" name="User" value="postgres"/><br><br>
+                    <input type="text" name="user" value="postgres"/><br><br>
                     <label>Пароль</label><br>
-                    <input type="password" name="Password" value="1q2w3e4r"/><br><br>
+                    <input type="password" name="password" value="1q2w3e4r"/><br><br>
                     <button class="btn btn-danger" type="submit" name="settings">Подключиться</button>
+                </form><br><br>
+                <form id="check_db">
+                    <button class="btn btn-danger" type="submit" name="check">Проверить</button>
                 </form>
+                <div id="result">
+
+                </div>
 
     </main>
 </body>
-
+<script src="templates/js/jquery-3.5.1.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#check_db').click(function () {
+            var host = $('input[name=host]').val();
+            var port = $('input[name=port]').val();
+            var user = $('input[name=user]').val();
+            var password = $('input[name=password]').val();
+            var dbname = $('input[name=dbName]').val();
+            var str = 'host=' + host + ' port=' + port + ' user=' + user + ' password=' + password + ' dbname=' + dbname + ' sslmode=disable'
+            $.post('http://127.0.0.1:8000/check', str, resultFunc);
+            console.log(str);
+        });
+        function resultFunc(data) {
+            alert(data)
+            $('#result').text(data)
+        }
+        function convertFormToJSON(form) {
+        const array = $(form).serializeArray(); // Encodes the set of form elements as an array of names and values.
+        const json = {};
+        $.each(array, function () {
+          json[this.name] = this.value || "";
+        });
+        return json;
+      }
+    });
+</script>
 </html>

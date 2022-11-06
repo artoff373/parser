@@ -11,12 +11,12 @@ import (
 func root(w http.ResponseWriter, r *http.Request) {
 	var root rootHTML
 	if !PDD.Connect {
-		if r.PostFormValue("DbName") != "" {
-			PDD.DbName = r.PostFormValue("DbName")
-			PDD.Host = r.PostFormValue("Host")
-			PDD.Port, _ = strconv.Atoi(r.PostFormValue("Port"))
-			PDD.User = r.PostFormValue("User")
-			PDD.Password = r.PostFormValue("Password")
+		if r.PostFormValue("dbName") != "" {
+			PDD.DbName = r.PostFormValue("dbName")
+			PDD.Host = r.PostFormValue("host")
+			PDD.Port, _ = strconv.Atoi(r.PostFormValue("port"))
+			PDD.User = r.PostFormValue("user")
+			PDD.Password = r.PostFormValue("password")
 		}
 	}
 	err := PDD.Сonnecting()

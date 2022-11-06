@@ -1,9 +1,13 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
+	"time"
 )
 
 func db(w http.ResponseWriter, r *http.Request) {
@@ -14,4 +18,21 @@ func db(w http.ResponseWriter, r *http.Request) {
 	if err := start.Execute(w, result); err != nil {
 		log.Fatal(err)
 	}
+}
+func check(w http.ResponseWriter, r *http.Request) {
+	psqlconn, err := io.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		fmt.Fprintf(w, "проблемы с передачей настроек сервера\n%v", err)
+		return
+	}
+	db, _ := sql.Open("postgres", string(psqlconn))
+	defer db.Close()
+	err = db.Ping()
+	if err != nil {
+		fmt.Fprintf(w, "проблемы с подключением\n%v", err)
+		return
+	}
+	fmt.Fprint(w, "Успешное подключение")
+	time.Sleep(time.Second)
 }

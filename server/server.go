@@ -18,6 +18,7 @@ func main() {
 	http.HandleFunc("/index", root)
 	http.HandleFunc("/report", report)
 	http.HandleFunc("/db", db)
+	http.HandleFunc("/check", check)
 	http.HandleFunc("/settings", settings)
 	http.Handle("/templates/", http.StripPrefix("/templates/", http.FileServer(http.Dir("templates"))))
 	log.Fatal(http.ListenAndServe(":8000", nil))
