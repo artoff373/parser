@@ -45,7 +45,7 @@
             var dbname = $('input[name=dbName]').val();
             var str = 'host=' + host + ' port=' + port + ' user=' + user + ' password=' + password + ' dbname=' + dbname + ' sslmode=disable'
             $.post('http://127.0.0.1:8000/check', str, resultFunc);
-            console.log(str);
+            return false;
         });
         function resultFunc(data) {
             alert(data)

@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"time"
 )
 
 func db(w http.ResponseWriter, r *http.Request) {
@@ -34,5 +33,4 @@ func check(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Fprint(w, "Успешное подключение")
-	time.Sleep(time.Second)
 }
