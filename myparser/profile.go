@@ -80,7 +80,8 @@ type Sources struct {
 
 // Обновление времени последнего поиска в профиля
 func (p *Profile) Update(newSearch string, db *sql.DB) error {
-	_, err := db.Exec(`UPDATE "Search"."Profile" SET "last_search" = '%s' WHERE "id"=%d`, newSearch, p.ID)
+	query := fmt.Sprintf(`UPDATE "Search"."Profile" SET "last_search" = '%s' WHERE "id"=%d`, newSearch, p.ID)
+	_, err := db.Exec(query)
 	if err != nil {
 		return fmt.Errorf("ошибка обновления - %v", err)
 	}

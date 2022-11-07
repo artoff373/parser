@@ -14,7 +14,7 @@ func init() {
 }
 
 func main() {
-	//go myparser.Search()
+	go myparser.Search()
 	http.HandleFunc("/index", root)
 	http.HandleFunc("/report", report)
 	http.HandleFunc("/db", db)

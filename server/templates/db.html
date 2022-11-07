@@ -6,6 +6,14 @@
     <link rel="stylesheet" href="./templates/css/bootstrap-grid.css">
     <link rel="stylesheet" href="./templates/css/bootstrap-reboot.css">
     <link rel="stylesheet" href="./templates/css/bootstrap.css">
+    <style>
+        .result {
+            width: 60%;
+            position:relative;
+            top: -500px;
+            left: 32%;
+        }
+    </style>
 </head>
 
 <body>
@@ -13,7 +21,7 @@
         <h1 class="lead navbar-brand">Подключиться к базе</h1>
     </header>
     <main class="jumbotron container mt-5">
-                <form id="root" name="root" method="POST" action="/index">
+                <form id="root" class="mr-1" name="root" method="POST" action="/index">
                     <label>Адрес базы данных</label><br>
                     <input type="text" name="host"  value="localhost" /> :
                     <input type="text" name="port"  value="5432" size="4"/><br><br>
@@ -27,10 +35,12 @@
                 </form><br><br>
                 <form id="check_db">
                     <button class="btn btn-danger" type="submit" name="check">Проверить</button>
+                </form><br><br>
+                <textarea id="result" class="result" rows="20">
+                </textarea>
+                <form id="check_db">
+                    <button class="btn btn-success mr-1" type="submit" name="init">Проверить</button>
                 </form>
-                <div id="result">
-
-                </div>
 
     </main>
 </body>
@@ -48,17 +58,8 @@
             return false;
         });
         function resultFunc(data) {
-            alert(data)
-            $('#result').text(data)
+            $('#result').html(data)
         }
-        function convertFormToJSON(form) {
-        const array = $(form).serializeArray(); // Encodes the set of form elements as an array of names and values.
-        const json = {};
-        $.each(array, function () {
-          json[this.name] = this.value || "";
-        });
-        return json;
-      }
     });
 </script>
 </html>
