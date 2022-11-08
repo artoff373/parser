@@ -33,33 +33,37 @@
                     <input type="password" name="password" value="1q2w3e4r"/><br><br>
                     <button class="btn btn-danger" type="submit" name="settings">Подключиться</button>
                 </form><br><br>
-                <form id="check_db">
+                <form id="check_json">
                     <button class="btn btn-danger" type="submit" name="check">Проверить</button>
+                </form><br>
+                <form id="init_db">
+                    <button class="btn btn-success mr-1" type="submit" name="init">Инициализировать</button>
                 </form><br><br>
                 <textarea id="result" class="result" rows="20">
                 </textarea>
-                <form id="check_db">
-                    <button class="btn btn-success mr-1" type="submit" name="init">Проверить</button>
-                </form>
 
     </main>
 </body>
 <script src="templates/js/jquery-3.5.1.js"></script>
 <script type="text/javascript">
     $(document).ready(function () {
-        $('#check_db').click(function () {
-            var host = $('input[name=host]').val();
-            var port = $('input[name=port]').val();
-            var user = $('input[name=user]').val();
-            var password = $('input[name=password]').val();
-            var dbname = $('input[name=dbName]').val();
-            var str = 'host=' + host + ' port=' + port + ' user=' + user + ' password=' + password + ' dbname=' + dbname + ' sslmode=disable'
-            $.post('http://127.0.0.1:8000/check', str, resultFunc);
+        $('#check_json').click(function () {
+            var jsons = {};
+            jsons = convertFormToJSON('#root')
+            $.post("http://127.0.0.1:8000/check_json", jsons, resultFunc)  
             return false;
         });
         function resultFunc(data) {
             $('#result').html(data)
-        }
+        };
+        function convertFormToJSON(form) {
+            const array = $(form).serializeArray(); // Encodes the set of form elements as an array of names and values.
+            const json = {};
+            $.each(array, function () {
+                json[this.name] = this.value || "";
+            });
+            return json;
+        };
     });
 </script>
 </html>

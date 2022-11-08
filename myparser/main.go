@@ -7,16 +7,17 @@ import (
 	"time"
 )
 
-func loggger(f *os.File, lg *chan string) {
+func loggger(f *os.File) {
 	defer f.Close()
 	log.SetOutput(f)
 	for {
-		rec := <-*lg
+		rec := <-lg
 		log.Println(rec)
 	}
 }
 
 var SDB DbData
+var lg = make(chan string)
 
 // Поиск по профилю
 func Search() error {
@@ -24,8 +25,7 @@ func Search() error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	lg := make(chan string)
-	go loggger(f, &lg)
+	go loggger(f)
 	SDB.NewDb("localhost", "Search", "postgres", "1q2w3e4r", 5432)
 	for {
 		err = SDB.Сonnecting()
@@ -47,7 +47,7 @@ func Search() error {
 				return fmt.Errorf("проблемы с присвоением списка профилей\n%v", err)
 			}
 			//Парсим профили
-			t, _ := parsingProfile(profile, &lg)
+			t := profile.parsingProfile()
 			//Обновляем время последнего поиска
 			err := profile.Update(t, SDB.Db)
 			if err != nil {

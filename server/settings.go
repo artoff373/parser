@@ -3,12 +3,14 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"mysearch/myparser"
 	"net/http"
 	"strconv"
 )
 
+// Отображение страницы настроек Профиля
 func settings(w http.ResponseWriter, r *http.Request) {
 	//собираем данные форм
 	var profile = new(myparser.Profile)
@@ -74,5 +76,27 @@ func settings(w http.ResponseWriter, r *http.Request) {
 		if err := page.Execute(w, htmlProfile); err != nil {
 			log.Fatal(err)
 		}
+	}
+}
+
+// проверка источника
+func checkSource(w http.ResponseWriter, r *http.Request) {
+	var p myparser.Profile
+	new, _ := io.ReadAll(r.Body)
+	err := p.Source.SourceParse(new)
+	if err != nil {
+		fmt.Fprintf(w, "проблемы с парсингом данных источника\n%v", err)
+		return
+	}
+	a, ok := myparser.ParsingSource(p)
+	if ok {
+		news := &a.Channels.News[0]
+		text, err := myparser.GetNews(news.Link, p.Source.Selector)
+		if err != nil {
+			fmt.Fprintf(w, "проблемы с парсингом данных источника\n%v", err)
+		}
+		fmt.Fprint(w, text)
+	} else {
+		fmt.Fprintf(w, "не удаётся подключиться к источнику")
 	}
 }

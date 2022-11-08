@@ -7,6 +7,30 @@
     <link rel="stylesheet" href="./templates/css/bootstrap-grid.css">
     <link rel="stylesheet" href="./templates/css/bootstrap-reboot.css">
     <link rel="stylesheet" href="./templates/css/bootstrap.css">
+    <style>
+        .check_source{
+            position:fixed;
+            top: 10%;
+            left: 25%;
+            width: 50%;
+            height: 50%;
+            border: black;
+            border-style: solid;
+            background-color:azure;
+            visibility:hidden;
+        }
+        .result{
+            position: relative;
+            top:5%;
+            left:5%;
+            width:90%;
+            height:70%;
+        }
+        .res_btn{
+            position:relative;
+            top: 15%;
+        }
+    </style>
 </head>
 
 <body>
@@ -57,13 +81,14 @@
                 </tbody>
             </table>
         </div>
-        <form method="POST" action="settings">
+        <form id="add" method="POST" action="settings">
             <label>Добавить источник</label><br>
             <input type="text" name="addSource" />
             <input type="text" name="addLink" />
             <input type="text" name="addSelector" />
             <button class="btn btn-danger" type="submit" name="sets" value="{{.ID}}">Добавить источник</button>
         </form>
+            <button class="btn btn-primary" type="submit" id="check_source" value="{{.ID}}">Проверить  источник</button>
         <br>
         <div class="table-responsive">
             <table class="table table-striped table-sm">
@@ -91,11 +116,44 @@
         </div>
 
         <form method="POST" action="settings">
-            <label>Добавить источник</label><br>
+            <label>Добавить ключ</label><br>
             <input type="text" name="addKey" />
             <button class="btn btn-danger" type="submit" name="sets" value="{{.ID}}">Добавить ключ</button>
         </form>
+        <div id="check_result" class="check_source">
+            <textarea id="result" class="result">
+                Some result
+            </textarea>
+            <button class="btn btn-danger res_btn" type="submit" id="check_ok">ОК</button>
+        </div>
     </main>
 </body>
-
+<script src="templates/js/jquery-3.5.1.js"></script>
+<script type="text/javascript">
+$(document).ready(function () {
+    $('#check_source').click(function(){
+        var jsons = {};
+        jsons = convertFormToJSON('#add')
+        console.log(jsons)
+        $.post("http://127.0.0.1:8000/chksrc", jsons, show_result)  
+        return false;
+    });
+    $('#check_ok').click(function(){
+        $('#check_result').attr("style", "visibility: hidden");
+        return false;
+    });
+    function show_result(data){
+        $('#result').text(data)
+        $('#check_result').attr("style", "visibility: visible");
+    };
+    function convertFormToJSON(form) {
+            const array = $(form).serializeArray(); // Encodes the set of form elements as an array of names and values.
+            const json = {};
+            $.each(array, function () {
+                json[this.name] = this.value || "";
+            });
+            return json;
+        };
+})
+</script>
 </html>

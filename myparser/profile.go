@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"encoding/xml"
 	"fmt"
+	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/lib/pq"
@@ -38,6 +40,28 @@ func (DD *DbData) Сonnecting() error {
 	}
 	DD.Db = db
 	DD.Connect = true
+	return nil
+}
+
+// парсим json от фронта
+func (d *DbData) JsonParse(b []byte) error {
+	var s []string
+	set := map[string]string{
+		"host":     "",
+		"port":     "",
+		"user":     "",
+		"password": "",
+		"dbName":   ""}
+	s = strings.Split(string(b), "&")
+	for i := range s {
+		ind := strings.Index(s[i], "=")
+		set[s[i][:ind]] = s[i][ind+1:]
+	}
+	d.Host = set["host"]
+	d.Password = set["password"]
+	d.DbName = set["dbName"]
+	d.Port, _ = strconv.Atoi(set["port"])
+	d.User = set["user"]
 	return nil
 }
 
@@ -76,6 +100,25 @@ type Sources struct {
 	Name     string
 	URL      string
 	Selector string
+}
+
+// Парсим источник от фронта
+func (s *Sources) SourceParse(b []byte) error {
+	var r []string
+	set := map[string]string{
+		"addLink":     "",
+		"addSelector": "",
+		"addSource":   ""}
+	uri, _ := url.PathUnescape(string(b))
+	r = strings.Split(uri, "&")
+	for i := range r {
+		ind := strings.Index(r[i], "=")
+		set[r[i][:ind]] = r[i][ind+1:]
+	}
+	s.Name = set["addSource"]
+	s.Selector = set["addSelector"]
+	s.URL = set["addLink"]
+	return nil
 }
 
 // Обновление времени последнего поиска в профиля
