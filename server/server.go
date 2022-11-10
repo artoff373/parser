@@ -1,15 +1,33 @@
 package main
 
 import (
+	"encoding/json"
+	"io"
 	"log"
 	"mysearch/myparser"
 	"net/http"
+	"os"
 )
 
 var PDD myparser.DbData
 
 func init() {
-	PDD.NewDb("localhost", "Search", "postgres", "1q2w3e4r", 5432)
+	f, err := os.Open("config.ini")
+	if err != nil {
+		log.Printf("проблемы с открытием файла настроек %v", err)
+		PDD.NewDb("localhost", "Search", "postgres", "1q2w3e4r", "5432")
+	}
+	defer f.Close()
+	data, err := io.ReadAll(f)
+	if err != nil {
+		log.Printf("проблемы с чтением файла настроек %v", err)
+		PDD.NewDb("localhost", "Search", "postgres", "1q2w3e4r", "5432")
+	}
+	err = json.Unmarshal(data, &PDD)
+	if err != nil {
+		log.Printf("проблемы с разбором файла настроек %v", err)
+		PDD.NewDb("localhost", "Search", "postgres", "1q2w3e4r", "5432")
+	}
 	PDD.Сonnecting()
 }
 
@@ -19,6 +37,7 @@ func main() {
 	http.HandleFunc("/report", report)
 	http.HandleFunc("/db", db)
 	http.HandleFunc("/check_json", checkJSON)
+	http.HandleFunc("/save_json", saveJSON)
 	http.HandleFunc("/chksrc", checkSource)
 	http.HandleFunc("/settings", settings)
 	http.Handle("/templates/", http.StripPrefix("/templates/", http.FileServer(http.Dir("templates"))))

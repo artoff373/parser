@@ -5,7 +5,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"net/url"
-	"strconv"
 	"strings"
 
 	"github.com/lib/pq"
@@ -13,7 +12,7 @@ import (
 
 type DbData struct {
 	Host     string `json:"host"`     //= "localhost"
-	Port     int    `json:"port"`     //= 5432
+	Port     string `json:"port"`     //= 5432
 	User     string `json:"user"`     //= "postgres"
 	Password string `json:"password"` //= "1q2w3e4r"
 	DbName   string `json:"dbName"`   //= "Search"
@@ -22,7 +21,7 @@ type DbData struct {
 }
 
 // Инициализация БД
-func (DD *DbData) NewDb(host, dbname, user, password string, port int) {
+func (DD *DbData) NewDb(host, dbname, user, password, port string) {
 	DD.Host = host
 	DD.Port = port
 	DD.DbName = dbname
@@ -32,7 +31,7 @@ func (DD *DbData) NewDb(host, dbname, user, password string, port int) {
 
 // Подключение к БД
 func (DD *DbData) Сonnecting() error {
-	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", DD.Host, DD.Port, DD.User, DD.Password, DD.DbName)
+	psqlconn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", DD.Host, DD.Port, DD.User, DD.Password, DD.DbName)
 	db, _ := sql.Open("postgres", psqlconn)
 	err := db.Ping()
 	if err != nil {
@@ -60,7 +59,7 @@ func (d *DbData) JsonParse(b []byte) error {
 	d.Host = set["host"]
 	d.Password = set["password"]
 	d.DbName = set["dbName"]
-	d.Port, _ = strconv.Atoi(set["port"])
+	d.Port = set["port"]
 	d.User = set["user"]
 	return nil
 }

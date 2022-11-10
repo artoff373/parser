@@ -6,14 +6,7 @@
     <link rel="stylesheet" href="./templates/css/bootstrap-grid.css">
     <link rel="stylesheet" href="./templates/css/bootstrap-reboot.css">
     <link rel="stylesheet" href="./templates/css/bootstrap.css">
-    <style>
-        .result {
-            width: 60%;
-            position:relative;
-            top: -500px;
-            left: 32%;
-        }
-    </style>
+    <link rel="stylesheet" href="./templates/css/artem.css">
 </head>
 
 <body>
@@ -23,21 +16,21 @@
     <main class="jumbotron container mt-5">
                 <form id="root" class="mr-1" name="root" method="POST" action="/index">
                     <label>Адрес базы данных</label><br>
-                    <input type="text" name="host"  value="localhost" /> :
-                    <input type="text" name="port"  value="5432" size="4"/><br><br>
+                    <input type="text" name="host"  value="{{.Host}}" /> :
+                    <input type="text" name="port"  value="{{.Port}}" size="4"/><br><br>
                     <label>База данных</label><br>
-                    <input type="text" name="dbName"  value="Search" /><br><br>
+                    <input type="text" name="dbName"  value="{{.DbName}}" /><br><br>
                     <label>Имя пользователя</label><br>
-                    <input type="text" name="user" value="postgres"/><br><br>
+                    <input type="text" name="user" value="{{.User}}"/><br><br>
                     <label>Пароль</label><br>
-                    <input type="password" name="password" value="1q2w3e4r"/><br><br>
+                    <input type="password" name="password" value="{{.Password}}"/><br><br>
                     <button class="btn btn-danger" type="submit" name="settings">Подключиться</button>
                 </form><br><br>
                 <form id="check_json">
                     <button class="btn btn-danger" type="submit" name="check">Проверить</button>
                 </form><br>
-                <form id="init_db">
-                    <button class="btn btn-success mr-1" type="submit" name="init">Инициализировать</button>
+                <form id="save">
+                    <button class="btn btn-success mr-1" type="submit" name="init">Сохранить</button>
                 </form><br><br>
                 <textarea id="result" class="result" rows="20">
                 </textarea>
@@ -45,6 +38,7 @@
     </main>
 </body>
 <script src="templates/js/jquery-3.5.1.js"></script>
+<script src="templates/js/artem.js"></script>
 <script type="text/javascript">
     $(document).ready(function () {
         $('#check_json').click(function () {
@@ -56,14 +50,12 @@
         function resultFunc(data) {
             $('#result').html(data)
         };
-        function convertFormToJSON(form) {
-            const array = $(form).serializeArray(); // Encodes the set of form elements as an array of names and values.
-            const json = {};
-            $.each(array, function () {
-                json[this.name] = this.value || "";
-            });
-            return json;
-        };
+        $('#save').click(function () {
+            var jsons = {};
+            jsons = convertFormToJSON('#root')
+            $.post("http://127.0.0.1:8000/save_json", jsons, resultFunc)  
+            return false;
+        });
     });
 </script>
 </html>

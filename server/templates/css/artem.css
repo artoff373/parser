@@ -1,0 +1,51 @@
+/*settings.html -- форма проверки нового источника*/
+.check_source{
+  position:fixed;
+  top: 10%;
+  left: 25%;
+  width: 50%;
+  height: 50%;
+  border: black;
+  border-style: solid;
+  background-color:azure;
+  visibility:hidden;
+}
+.result{
+  position: relative;
+  top:5%;
+  left:5%;
+  width:90%;
+  height:70%;
+}
+.res_btn{
+  position:relative;
+  top: 15%;
+}
+/*index.html -- форма ввода имени нового профиля*/
+.add{
+  position:fixed;
+  top: 10%;
+  left: 25%;
+  width: 20%;
+  height: 20%;
+  border: black;
+  border-style: solid;
+  background-color:azure;
+  align-self:stretch;
+  visibility:hidden;
+}
+.ok{
+  position:relative;
+  align-self: flex-end;
+}
+.cancel{
+  position:relative;
+  align-self:flex-start;
+}
+/*db.html -- окно выдачи результатов*/
+.result_window {
+  width: 60%;
+  position:relative;
+  top: -500px;
+  left: 32%;
+}

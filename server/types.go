@@ -32,3 +32,11 @@ type postiks struct {
 	Text    template.HTML
 	Link    template.HTML
 }
+
+type DbHtml struct {
+	Host     template.HTML
+	Port     template.HTML
+	User     template.HTML
+	Password template.HTML
+	DbName   template.HTML
+}

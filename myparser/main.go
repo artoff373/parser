@@ -26,7 +26,7 @@ func Search() error {
 		log.Fatal(err)
 	}
 	go loggger(f)
-	SDB.NewDb("localhost", "Search", "postgres", "1q2w3e4r", 5432)
+	SDB.NewDb("localhost", "Search", "postgres", "1q2w3e4r", "5432")
 	for {
 		err = SDB.Сonnecting()
 		if err != nil {
