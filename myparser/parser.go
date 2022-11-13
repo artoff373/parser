@@ -24,7 +24,7 @@ func (n *News) ParsingNews(ls string, sel string, node *words.Branch,
 	}
 	last, err := time.Parse(time.RFC1123Z, ls)
 	if err != nil {
-		return fmt.Errorf("проблемы с парсингом даты %s: %v", last, err)
+		return fmt.Errorf("проблемы с парсингом даты %s: %v", ls, err)
 	}
 	if t.After(last) {
 		post.PubDate = n.PubDate

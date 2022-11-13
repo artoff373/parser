@@ -8,74 +8,32 @@
     <link rel="stylesheet" href="templates/css/bootstrap-reboot.css">
     <link rel="stylesheet" href="templates/css/bootstrap.css">
 </head>
-<style>
-    .pre_window {
-        position:fixed;
-        top: 10%;
-        left: 25%;
-        width: 20%;
-        height: 20%;
-        border: black;
-        border-style: solid;
-        background-color:azure;
-        align-self:stretch;
-        z-index: 1000;
-        visibility:hidden;
-}
-</style>
 <body>
-    <div id="pre_window" class="pre_window">
-            <div id="message"> Сформировать отчет?</div><br>
-            <button class="btn btn-success ok" type="submit" id="yes" name="yes">OK</button>
-        <button class="btn btn-danger cancel" type="submit" id="cancel">Закрыть</button>
-    </div>
     <div>
         <header class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
             <h1 class="lead navbar-brand">Собранные новости</h1>
             <form class="mr-auto" method="POST" action="/index">
-                <button type="submit" class="btn btn-success">Вернуться к выбору профиля</button>
+                <button type="submit" class="btn btn-success mr-4">Вернуться к выбору профиля</button>
             </form>
-            <form method="POST" class=" mr-3" action="/archive">
-            <button id="archive" name="archive" type="submit" class="btn btn-primary">Список отчетов</button>
-            </form>
-                <button id="make" name="make" type="submit" class="btn btn-primary mr-4">Подготовить отчет</button>
-
             </header>
 
         <main class="jumbotron container mt-5">
-            <div id="accordion" role="tablist">
                 {{range .Postik}}
                 <div class="card" role="presentation">
                     <div class="card-header" role="tab" id="heading{{.Id}}">
-                        <div class="row">
                             <div class="col">
                                 <h6 class="mb-0">
-                                    <a class="js-title" data-toggle="collapse" href="#collapse{{.Id}}" aria-expanded="true"
-                                        aria-controls="collapse{{.Id}}">
                                         <b>{{.Source}}:</b> {{.Title}}
-                                    </a>
                                 </h6>
                             </div>
-                            <div class="col-2">
-                                <div class="custom-control custom-checkbox pl-2">
-                                    <input onchange="handleChange(event)" type="checkbox" value="{{.Id}}" class="custom-control-input js-checkbox-toggle" id="{{.Id}}">
-                                    <label for={{.Id}} class="custom-control-label">Добавить в отчет<br>Релевантность: {{.Relev}}</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="collapse{{.Id}}" class="collapse js-text" data-parent="#accordion" role="tabpanel"
-                            aria-labelledby="heading{{.Id}}">
                             <div class="card-body">
                                 <h6>{{.PubDate}}</h6>
-                                <a href={{.Link}}>Ссылочка на источник</a>
                                 <p>{{.Text}}</p>
                             </div>
-                        </div>
                     </div>
                 </div>
                 {{end}}
-            </div>
+
         </main>
     </div>
 

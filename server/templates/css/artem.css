@@ -10,12 +10,14 @@
   background-color:azure;
   visibility:hidden;
 }
+
 .result{
   position: relative;
   top:5%;
   left:5%;
   width:90%;
   height:70%;
+  align-self:center;
 }
 .res_btn{
   position:relative;
@@ -48,4 +50,11 @@
   position:relative;
   top: -500px;
   left: 32%;
+}
+/*report.html -- окно предварительной проверки*/
+.pre_window {
+  width: 60%;
+  position:fixed;
+  top: 150px;
+  left:auto;
 }

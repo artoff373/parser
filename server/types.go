@@ -31,6 +31,8 @@ type postiks struct {
 	PubDate template.HTML
 	Text    template.HTML
 	Link    template.HTML
+	Relev   template.HTML
+	Source  template.HTML
 }
 
 type DbHtml struct {
@@ -39,4 +41,9 @@ type DbHtml struct {
 	User     template.HTML
 	Password template.HTML
 	DbName   template.HTML
+}
+
+type Archive struct {
+	Read template.HTML
+	Val  template.HTML
 }

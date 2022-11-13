@@ -39,7 +39,10 @@ func main() {
 	http.HandleFunc("/check_json", checkJSON)
 	http.HandleFunc("/save_json", saveJSON)
 	http.HandleFunc("/chksrc", checkSource)
+	http.HandleFunc("/make", make)
+	http.HandleFunc("/archive", archive)
 	http.HandleFunc("/settings", settings)
+	http.HandleFunc("/print", print)
 	http.Handle("/templates/", http.StripPrefix("/templates/", http.FileServer(http.Dir("templates"))))
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
